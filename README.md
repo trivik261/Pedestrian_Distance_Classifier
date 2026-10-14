@@ -1,12 +1,18 @@
-# Pedestrian_Distance_Classifier
-For our Product ‘IntelliPick’ we have developed an application that is capable of identifying and measuring the distance between any two number of people.The application is supported by The TensorFlow Object Detection API which is the framework for creating a deep learning network that solves object detection problems. It contains some pre-trained models trained on different datasets which can be used for inference.
+# Pedestrian Detection & Distance Visualization
 
-The current application can be used for transfer learning that helps us to customize the software to serve our needs .In our case we use it identify shortest distance between the firefighter and the people trapped to help reach them on time.
-The common intuition behind transfer learning for image classification is that if a model is trained on a large and general enough dataset, this model will effectively serve as a generic model of the visual world. We can then take advantage of these learned feature maps without having to start from scratch by training a large model on a large dataset.
-In this case, we did not need to apply transfer learning since we want to identify people, and there are already some models trained to inference this. We have used the model ssd_mobilenet_v2_coco_2018_03_29 which has been trained on these objects.
+Detect people in an image, draw bounding boxes, and compute unique pairwise distances between box centers.
 
-Based on these trained models ,edge contours had already been trained enough to identify any person in the frame.Based on these pre-trained calculations ,whenever a  person enters into the frame ,his/her outline will be marked and a rectangle outline will cover the human and distance between two such humans will be compared based on the distance between the edges and centroid of the rectangle.For a video ,a frame of the video will be taken and the distance will be calculated and the process will continue until every frame of the video is exhausted.
+## Portable entry point
+```bash
+python -m pip install -r requirements.txt
+python pedestrian.py sample/image34.jpg --output annotated.jpg
+python -m unittest discover -s tests -v
+```
+The default detector is OpenCV's built-in HOG/SVM person detector, which needs no downloaded weights. For the original SSD MobileNet method, provide the pretrained frozen TensorFlow graph and its matching OpenCV graph configuration:
+```bash
+python pedestrian.py input.jpg --model frozen_inference_graph.pb --config graph.pbtxt --output annotated.jpg
+```
+Use `--boxes boxes.json` for detector-independent geometry with supplied `[x,y,width,height]` boxes. `--pixels-per-meter N` enables an explicitly calibrated approximation; otherwise distances are **pixels**. A single image does not establish physical distances or safety thresholds. The historical notebook's `(width-150)/7` assumption is not applied in the portable implementation.
 
-Sample:
-![image34](https://user-images.githubusercontent.com/58656351/113976438-c8e91b80-985e-11eb-8769-85b7893c2c9f.jpg)
-![image34_p](https://user-images.githubusercontent.com/58656351/113976457-d0102980-985e-11eb-880e-3e1373b9c83c.jpg)
+## Fixes
+Removed Colab/Drive path dependencies from the run path, avoided division by zero for vertically aligned centers, replaced duplicate permutations with unique combinations, and handled empty detections. The notebook preserves the original TensorFlow 1.x/SSD workflow for historical context. HOG and SSD are different detectors; do not compare their outputs as though they were the same experiment.

@@ -1,0 +1,7 @@
+build/
+__pycache__/
+*.pyc
+trace.json
+annotated.jpg
+project_roots.txt
+*.mmdb
